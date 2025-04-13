@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VoicePick (PhD)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f8f9fa;
+      color: #333;
+    }
+    header {
+      background-color: #fde1a9;
+      color: white;
+      padding: 1rem;
+      text-align: center;
+      font-size: 1.2rem;
+    }
+    .container {
+      max-width: 800px;
+      margin: 2rem auto;
+      padding: 1rem;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .controls, .navigation {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+    }
+   
+    button {
+        padding: 0.6rem 1.2rem !important; /* Ensure padding is not overridden */
+        border: none !important;
+        border-radius: 8px !important;
+        font-size: 1rem !important;
+        font-weight: 600 !important;
+        background: linear-gradient(to right, #0d6efd, #5b8dfd) !important; /* Prevent background override */
+        color: white !important;
+        box-shadow: 0 4px 10px rgba(13, 110, 253, 0.3) !important;
+        transition: all 0.3s ease !important; /* Ensure transition is maintained */
+    }
+    
+    button:hover {
+        transform: translateY(-2px) !important;
+        box-shadow: 0 6px 12px rgba(13, 110, 253, 0.5) !important;
+    }
+    
+    select {
+      padding: 0.6rem 1rem;
+      border-radius: 8px;
+      font-size: 1rem;
+      border: 1px solid #ccc;
+      background-color: #fff;
+      transition: border-color 0.3s;
+    }
+    
+    select:focus {
+      outline: none;
+      border-color: #0d6efd;
+    }
+	.text-content {
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+    .hidden {
+      display: none;
+    }
+    audio {
+      display: block;
+      margin: 1rem auto;
+    }
+  </style>
+</head>
+<body  class="flex items-center justify-center min-h-screen bg-blue-50">
+
+	<div class="bg-white shadow-lg rounded-xl p-6 w-96 text-center">
+		<!-- <h1 class="text-xl font-bold text-gray-800 mb-4">VoicePick (PhD)</h1> -->
+		<h1 style="
+		  font-size: 24px;
+		  font-weight: 800;
+		  color: #1f2937; /* Tailwind 的 text-gray-800 */
+		  margin-bottom: 1rem;
+		  font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+		  text-align: center;
+		">
+		  VoicePick (PhD)
+		</h1>
+		<!-- <div class="container"> -->
+		<!-- </div> -->
+		<!-- <div class="controls">
+		  <label for="numberSelect" style="font-size: 17px; line-height: 1.6; font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif; font-weight: 700;">Choose a question:</label>
+		  <select id="numberSelect"></select>
+		  <button onclick="loadQuestion()">Go</button>
+		</div> -->
+		<div class="controls" style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+		  <label for="numberSelect" style="font-size: 17px; line-height: 1.6; font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif; font-weight: 700; margin: 0;">Choose a question:</label>
+		  <select id="numberSelect" style="height: 40px; font-size: 1rem; padding: 0 0.75rem; border-radius: 8px; border: 1px solid #ccc;"></select>
+		  <button onclick="loadQuestion()" style="height: 40px;">Go</button>
+		</div>
+				
+		<div class="text-content">
+		  <audio id="audioPlayer" controls></audio>
+		  <!-- <p id="english" class="hidden" style=""></p> -->
+		  <!-- <p id="chinese" class="hidden"style="" ></p> -->
+		  <p id="english" class="hidden" style="font-size: 17px; line-height: 1.6; font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif; font-weight: 700;"></p>
+		  <p id="chinese" class="hidden" style="font-size: 17px; line-height: 1.6; font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;"></p>
+		  <button onclick="toggleText()">Toggle Translation</button>
+		</div>
+				
+		<div class="navigation">
+		  <button onclick="changeQuestion(-1)">Previous</button>
+		  <button onclick="changeQuestion(1)">Next</button>
+		</div>
+	</div>
+	
+  
+
+  <script>
+    const data = `Can you introduce your family to us?|可以介绍一下你的家庭吗?|1
+Could you tell us something about your hometown?|可以介绍⼀下你的家乡吗?|2
+What is the most memorable thing about your hometown?|你对你家乡记忆最深刻的东西是什么?|3
+Please introduce your undergraduate school life?|介绍⼀下你的⼤学⽣活？|4
+Why do you want to pursue a PhD?|你为什么想攻读博士学位？|5
+What motivated you to apply for a PhD program?|是什么促使你申请博士学位的？|6
+What’s your reason for wanting to do a PhD?|你想攻读博士学位的理由是什么？|7
+Why do you want to study in our school?|为啥选我们学校 ?|8
+What’s your plan for your PhD journey?|你的博士学习计划是怎样的？|9
+How do you plan to structure your PhD over the next few years?|你计划如何规划未来几年的博士学习？|10
+Do you have a plan for your PhD study and research timeline?|你对你的博士学习和研究时间表有什么规划吗？|11
+What kind of personality are you?|你是个什么性格的人？|12
+What kind of research do you want to focus on during your PhD?|你在攻读博士学位期间想专注于哪些类型的研究？|13
+What research areas are you planning to explore over the next four years?|你计划在未来四年探索哪些研究领域？|14
+What’s your research goal for your PhD?|你的博士研究目标是什么？|15
+What are your strengths and weakness?|谈谈个人优缺点/你是个什么性格的人？|16
+What kind of books do you enjoy reading？|你喜欢什么类型的书？|17
+What is the deepest thing in your memory?|你印象最深刻的事情?|18
+W hat is your favorite subject?|本科期间最喜欢的课程？|19
+What will you do if you failed this time?|如果失败了你会怎么做?|20
+What would like to do five years after graduation?|毕业五年后的规划?|21
+What do you think are the necessary qualities that one should have?|你认为⼀个⼈应该具备的必要品质是什么?|22
+Have you taken any exams related to your major?|你参加过与专业相关的考试吗？|23
+W hat do you like and dislike about your school life?|你喜欢/不喜欢学校的什么？|24
+Can you tell me about your experience during your master’s studies?|能谈谈你硕士学习期间的经历吗？|25
+What was your life like as a master's student?|你的硕士生活是怎样的？|26
+Could you share something about your graduate school life?|能分享一下你的研究生生活吗？|27
+How was your academic and research experience during your master's?|你的硕士学习和研究经历如何？|28
+How do you plan your PhD career?|你是如何规划你的博士生涯的？|29
+How do you envision your PhD journey and long-term goals?|你如何规划你的博士生涯和长期目标？|30
+Do you have a clear plan for your doctoral research and career path?|你对你的博士研究和职业发展有清晰的规划吗？|31
+What is your biggest dream?|你最大的梦想是什么|32
+What kind of person do you want to be in the future?|你将来想成为什么样的人|33
+Which of your family members influences you most?|你的哪些家庭成员对你影响最大?|34
+Could you tell me something about the local specialties of your hometown?|能介绍一下你的家乡特产嘛?|35
+Which discipline do you think has promoted social progress？|你认为哪一个学科推动了社会进步|36
+What is your favorite city？|你最喜欢的城市？|37
+What do you think of chatgpt/deepseeks?|怎么看待 chatgpt/deepseeks?|38
+What is your biggest fear？|你最害怕的事情是什么？|39
+What do you think should be paid attention to in teamwork？|你认为团队合作中需要注意什么？|40
+How will you face the challenge?|你会如何⾯对挑战？|41
+What are the customs and activities during the Spring Festival？|春节有哪些习俗以及春节期间的活？|42
+You can share the difficulties you encountered once and how to solve them?|You can share the difficulties you encountered once and how to solve them?|43
+What do you regret most？|你最后悔的事是什么？|44
+What is your way of dealing with stress？|你处理压力的方法是啥？|45
+Give you an elephant. How can you take it as your own？|给你个大象，你怎么把他据为已有？|46
+What do you care about most now?|你现在最在意什么？|47
+Please describe your hero?|形容你心目中的英雄|48
+Please introduce yourself briefly|请简单介绍一下你自己|49
+What do you think a PhD can bring you?|你认为博士学位能给你带来什么？|50
+What do you hope to gain from pursuing a PhD?|你希望从攻读博士学位中获得什么？|51
+Could you give a short overview of your research experience and academic background?|您能简单介绍一下您的研究经历和学术背景吗？|52
+What qualities do you think are required for a PhD?|你认为读博需要哪些品质?|53
+What do you think is the most important research skill for a PhD student?|作为一名博士生，你认为最重要的研究技能是什么?|54
+What is your research direction and plan for the future?|你未来的研究方向和计划是什么?|55
+What’s your reason for choosing a combined Master and PhD track?|你选择硕博连读项目的原因是什么？|56`;
+
+    const questions = data.trim().split('\n').map(line => {
+      const [en, cn, id] = line.split('|');
+      return { en, cn, id: Number(id) };
+    });
+
+    const numberSelect = document.getElementById('numberSelect');
+    const english = document.getElementById('english');
+    const chinese = document.getElementById('chinese');
+    const audioPlayer = document.getElementById('audioPlayer');
+    let currentIndex = 0;
+
+    questions.forEach(q => {
+      const option = document.createElement('option');
+      option.value = q.id;
+      option.textContent = q.id;
+      numberSelect.appendChild(option);
+    });
+
+    function loadQuestion(index = null) {
+      const selected = index !== null ? index : Number(numberSelect.value);
+      const question = questions.find(q => q.id === selected);
+      if (!question) return;
+      currentIndex = questions.indexOf(question);
+      english.textContent = question.en;
+      chinese.textContent = question.cn;
+      english.classList.add('hidden');
+      chinese.classList.add('hidden');
+      audioPlayer.src = `./speech/${question.id}.m4a`;
+      numberSelect.value = question.id;
+    }
+
+    function toggleText() {
+      english.classList.toggle('hidden');
+      chinese.classList.toggle('hidden');
+    }
+
+    function changeQuestion(offset) {
+      let newIndex = currentIndex + offset;
+      if (newIndex < 0) newIndex = 0;
+      if (newIndex >= questions.length) newIndex = questions.length - 1;
+      loadQuestion(questions[newIndex].id);
+    }
+
+    window.onload = () => {
+      loadQuestion(1);
+    }
+  </script>
+</body>
+</html>
